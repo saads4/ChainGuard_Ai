@@ -81,6 +81,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             Response from next middleware
         """
         try:
+            # Skip security checks for docs and static assets
+            if request.url.path in ["/docs", "/redoc", "/openapi.json"] or request.url.path.startswith("/static/"):
+                return await call_next(request)
+            
             # Get client IP
             client_ip = self._get_client_ip(request)
             
@@ -248,9 +252,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                     result["reason"] = f"Blocked content in URL parameter: {param_name}"
                     return result
             
-            # Check headers
+            # Check headers (skip common legitimate headers)
+            legitimate_headers = {'cookie', 'authorization', 'content-type', 'accept', 'user-agent', 'host'}
             for header_name, header_value in request.headers.items():
-                if self._contains_blocked_content(str(header_value)):
+                if header_name.lower() not in legitimate_headers and self._contains_blocked_content(str(header_value)):
                     result["valid"] = False
                     result["reason"] = f"Blocked content in header: {header_name}"
                     return result

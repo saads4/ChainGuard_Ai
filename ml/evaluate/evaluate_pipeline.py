@@ -38,12 +38,18 @@ def load_stage2() -> tuple | None:
         print(f"       Expected: {CENTROID_FILE}")
         return None
     try:
+        # First try to import torch separately to catch DLL errors early
+        import torch
         from sentence_transformers import SentenceTransformer
         model    = SentenceTransformer("all-MiniLM-L6-v2")
         centroid = np.load(CENTROID_FILE)
         return model, centroid
     except ImportError:
         print("[WARN] sentence-transformers not installed. Stage 2 skipped.")
+        return None
+    except Exception as e:
+        print(f"[WARN] torch/sentence-transformers initialization failed: {e}")
+        print("       Stage 2 skipped due to torch/tensor compatibility issues.")
         return None
 
 
@@ -66,7 +72,8 @@ def load_stage3() -> tuple | None:
 
 def stage2_score(model, centroid: np.ndarray, texts: list[str]) -> np.ndarray:
     """Return cosine similarity to centroid for each text. Lower = more anomalous."""
-    embeddings = model.encode(texts, batch_size=64, show_progress_bar=False,
+    print(f"  Processing {len(texts):,} texts in batches...")
+    embeddings = model.encode(texts, batch_size=32, show_progress_bar=True,
                               convert_to_numpy=True, normalize_embeddings=True)
     sims = embeddings @ centroid
     return sims
