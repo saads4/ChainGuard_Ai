@@ -95,7 +95,7 @@ def run_step(step: dict, step_num: int, total: int) -> tuple[bool, float]:
     """Run one pipeline step via subprocess to guarantee clean state."""
     module = step["module"]
     label  = step["name"]
-    script = str(PROJECT_ROOT / module.replace(".", "/") + ".py")
+    script = str(PROJECT_ROOT / module.replace(".", "/")) + ".py"
 
     print(f"\n[{step_num}/{total}] {label}")
     print(f"       {'-' * 50}")

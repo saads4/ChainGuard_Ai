@@ -73,8 +73,10 @@ def load_splits() -> tuple[pd.DataFrame, pd.DataFrame]:
             print("        Run ml/preprocess/stage3_mpdd_prep.py first.")
             sys.exit(1)
 
-    train = pd.read_csv(TRAIN_FILE, encoding="utf-8")
-    test  = pd.read_csv(TEST_FILE,  encoding="utf-8")
+    with open(TRAIN_FILE, encoding='utf-8') as f:
+        train = pd.read_csv(f)
+    with open(TEST_FILE, encoding='utf-8') as f:
+        test = pd.read_csv(f)
     return train, test
 
 

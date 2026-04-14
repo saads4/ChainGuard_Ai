@@ -100,7 +100,7 @@ dataset/
 ### Run the Full Pipeline (One Command)
 
 ```powershell
-python ml\run_all.py
+    python ml\run_all.py
 ```
 
 This runs all steps in sequence:

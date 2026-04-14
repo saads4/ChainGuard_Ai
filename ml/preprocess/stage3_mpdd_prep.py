@@ -113,8 +113,9 @@ def main() -> None:
     print(f"[INFO] Test  set : {len(test_df)} rows")
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    train_df.to_csv(TRAIN_FILE, index=False, encoding="utf-8")
-    test_df.to_csv(TEST_FILE,  index=False, encoding="utf-8")
+    
+    train_df.to_csv(TRAIN_FILE, index=False, encoding='utf-8')
+    test_df.to_csv(TEST_FILE, index=False, encoding='utf-8')
 
     print(f"[OK]   Saved train -> {TRAIN_FILE}")
     print(f"[OK]   Saved test  -> {TEST_FILE}")
