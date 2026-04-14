@@ -29,7 +29,7 @@ execution without passing through every layer.
 SECTION 2 — FOLDER STRUCTURE (COMPLETE)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-chainguard_ai/
+AgentShield/
 │
 ├── README.md                          ← Project overview and quickstart
 ├── requirements.txt                   ← Python dependencies
@@ -118,16 +118,17 @@ chainguard_ai/
 │           ├── campaign_tool.py
 │           └── analytics_tool.py
 │
-├── api/                               ← REST API (optional: expose ChainGuardAI as a service)
+├── api/                               ← REST API (optional: expose AgentShield as a service)
 │   ├── __init__.py
-│   ├── main.py                        ← FastAPI app entry point
+│   ├── app.py                         ← FastAPI app entry point
 │   ├── routes/
 │   │   ├── agent_routes.py            ← Register agents, issue credentials
-│   │   ├── message_routes.py          ← Receive and process incoming messages
-│   │   └── audit_routes.py            ← Query audit logs, verify chain
+│   │   ├── audit_routes.py            ← Query audit logs, verify chain
+│   │   └── security_routes.py         ← Security endpoints
 │   └── middleware/
-│       ├── auth_middleware.py         ← API authentication
-│       └── rate_limiter.py
+│       ├── audit_middleware.py        ← Audit logging middleware
+│       ├── rate_limiter.py            ← API rate limiting
+│       └── security_middleware.py     ← Security middleware
 │
 ├── tests/                             ← TEST SUITE
 │   ├── unit/
@@ -144,15 +145,35 @@ chainguard_ai/
 │       ├── simulate_impersonation.py
 │       └── simulate_privilege_escalation.py
 │
-├── scripts/
+├── scripts/                           ← Setup and maintenance scripts
 │   ├── bootstrap.py                   ← One-command setup: generate keys, create registry
+│   ├── setup.py                       ← Environment validation and setup
 │   ├── generate_agent_keys.py         ← Standalone key generation utility
-│   └── verify_audit_log.py            ← CLI tool to verify log chain integrity
+│   ├── verify_audit_log.py            ← CLI tool to verify log chain integrity
+│   ├── dev.py                         ← Development utilities
+│   └── deploy.py                      ← Deployment script
+│
+├── ml/                                ← Machine Learning Pipeline
+│   ├── run_all.py                     ← Run complete ML pipeline
+│   ├── preprocess/                    ← Data preprocessing scripts
+│   ├── train/                         ← Model training scripts
+│   └── evaluate/                       ← Model evaluation scripts
+│
+├── dataset/                           ← Training and evaluation datasets
+│   ├── action_log/
+│   ├── attack_simulation/
+│   ├── stage2_benign/
+│   └── stage3_training/
+│
+├── data/                              ← Generated model artifacts and processed data
+├── logs/                              ← Application logs
+├── keys/                              ← Cryptographic keys storage
 │
 └── docs/
-    ├── architecture.md                ← This document (markdown version)
-    ├── threat_model.md                ← Threat categories and mitigations
-    ├── api_reference.md               ← REST API documentation
+    ├── README.md                      ← Documentation overview
+    ├── architecture.md                ← Architecture documentation
+    ├── installation.md                ← Installation guide
+    └── api_reference.md               ← REST API documentation
 
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -636,33 +657,38 @@ SECTION 6 — KEY CONFIGURATION (config.yaml overview)
 
   identity:
     key_algorithm: Ed25519           # Cryptographic algorithm for keypairs
-    did_method: chainguard_ai          # DID method prefix
-    registry_path: core/identity/registry/agent_registry.json
+    did_method: did:web              # DID method prefix
+    registry_path: ./core/identity/registry/agent_registry.json
 
   ingestion:
-    sandbox_mode: subprocess         # 'subprocess' or 'container'
-    ipc_transport: unix_pipe         # 'unix_pipe' or 'local_http'
-    schema_strict: true              # Reject intents with unknown fields
+    sandbox_enabled: true           # Enable sandbox mode
+    ipc_timeout: 30                  # IPC timeout in seconds
+    intent_schema_version: "1.0"    # Intent schema version
 
   detection:
-    embedding_model: all-MiniLM-L6-v2
-    anomaly_threshold: 0.75          # Cosine sim below this = anomaly
-    stage3_trigger_score: 0.6        # Stage 2 score above this triggers Stage 3
-    risk_thresholds:
-      low: 1.5
-      medium: 3.0
-      high: 3.0                      # Above this = hard block
+    embedding:
+      model_name: "all-MiniLM-L6-v2"
+      similarity_threshold: 0.7      # Cosine sim threshold
+    risk:
+      thresholds:
+        low: 0.3
+        medium: 0.6
+        high: 0.8                    # Above this = hard block
 
   action_gate:
-    default_policy: default_policy.json
-    hold_timeout_seconds: 300        # 5 min wait for human approval
-    escalation_webhook: https://...  # Where to send alerts
+    dual_check_enabled: true         # Enable dual-check system
+    escalation:
+      enabled: true
+      timeout: 60                   # Escalation timeout in seconds
+      endpoint: "http://localhost:8081/escalation"
 
   audit:
-    log_path: core/audit/logs/audit_chain.jsonl
-    sign_entries: true
-    verify_on_startup: true          # Verify chain integrity when system starts
-    rotation_size_mb: 100
+    hash_chain:
+      algorithm: "SHA-256"
+      signing_enabled: true
+    logging:
+      file_path: "./core/audit/logs/audit_chain.jsonl"
+      rotation_size: 104857600      # 100MB
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 SECTION 7 — PERFORMANCE CHARACTERISTICS
@@ -705,5 +731,5 @@ SECTION 8 — BOOTSTRAP / SETUP SEQUENCE
 
 ================================================================================
 END OF DOCUMENT
-ChainGuardAI — Secure Multi-Agent Systems
+AgentShield — Secure Multi-Agent Systems
 ================================================================================

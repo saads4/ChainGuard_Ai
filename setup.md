@@ -18,7 +18,7 @@ Make sure your system has the following installed:
 ## 2. Setting Up the Virtual Environment
 
 ```powershell
-cd path\to\ChainGuardAI
+cd path\to\AgentShield
 
 # Create virtual environment
 python -m venv venv
@@ -69,9 +69,6 @@ These scripts initialize DIDs, key pairs, agent registry, and the audit chain.
 
 ```powershell
 # Step 1 — validate environment and create missing directories
-python scripts\setup.py
-
-# Step 2 — initialize Root Authority keys, register sample agents, start audit chain
 python scripts\bootstrap.py
 ```
 
@@ -108,16 +105,15 @@ This runs all steps in sequence:
 | Step | Script | What it does |
 |------|--------|--------------|
 | 1 | `stage2_benign_prep.py` | Extracts benign prompts from `Stage_2.jsonl` |
-| 2 | `stage3_mpdd_prep.py` | Stratified 80/20 train/test split of MPDD.csv |
-| 3 | `attack_sim_merge.py` | Merges 3 attack CSVs → `wild_attacks.csv` (eval-only) |
-| 4 | `train_stage2_baseline.py` | Encodes benign texts → saves `benign_centroid.npy` |
-| 5 | `train_stage3_classifier.py` | Trains TF-IDF + LogReg intent classifier |
-| 6 | `build_action_gate.py` | Builds rule-based thresholds from `action_dataset.csv` |
-| 7 | `evaluate_pipeline.py` | Quick evaluation on 500 wild attack rows |
+| 2 | `attack_sim_merge.py` | Merges 3 attack CSVs → `wild_attacks.csv` (eval-only) |
+| 3 | `train_stage2_baseline.py` | Encodes benign texts → saves `benign_centroid.npy` |
+| 4 | `train_stage3_classifier.py` | Trains TF-IDF + LogReg intent classifier |
+| 5 | `build_action_gate.py` | Builds rule-based thresholds from `action_dataset.csv` |
+| 6 | `evaluate_pipeline.py` | Quick evaluation on 500 wild attack rows |
 
 > **Skip Stage 2 if the centroid already exists:**
 > ```powershell
-> python ml\run_all.py --skip-s2
+> python ml\run_all.py --skip-stage2
 > ```
 
 ### Model Artifacts (auto-generated)
@@ -214,7 +210,7 @@ Each run appends a structured log entry to `logs/pipeline_runs.jsonl`:
 Once bootstrapping and ML training are complete:
 
 ```powershell
-uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn api.app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Access the interactive API docs at: `http://localhost:8000/docs`
