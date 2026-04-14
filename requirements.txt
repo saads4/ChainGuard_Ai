@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────────────────────
+# ChainGuardAI — Python Dependencies
+# Install: pip install -r requirements.txt
+# ─────────────────────────────────────────────────────────────
+
+# Core cryptography and identity
+cryptography>=41.0.0
+pydantic>=2.0.0
+python-jose[cryptography]>=3.3.0
+
+# ─── Machine Learning — Core Framework ───────────────────────
+# Embeddings + anomaly detection (Stage 2)
+sentence-transformers>=2.2.0
+torch>=2.0.0
+
+# Classical ML + TF-IDF (Stage 3 intent classifier)
+scikit-learn>=1.4.0
+numpy>=1.24.0
+
+# ─── ML Pipeline Data Processing ─────────────────────────────
+# Used by ml/preprocess/* and ml/train/* scripts
+pandas>=2.0.0
+joblib>=1.3.0               # efficient model serialization alongside pickle
+
+# ─── API and Web Framework ───────────────────────────────────
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# ─── Security and Validation ─────────────────────────────────
+pydantic-settings>=2.0.0
+python-dotenv>=1.0.0
+regex>=2023.8.8
+
+# ─── Testing and Development ─────────────────────────────────
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+httpx>=0.25.0
+
+# ─── Utilities ───────────────────────────────────────────────
+pyyaml>=6.0.1
+click>=8.1.0
+rich>=13.0.0                # terminal output in pipeline_demo.py
+loguru>=0.7.0               # structured logging across all modules
+
+# ─── IPC and Process Isolation ───────────────────────────────
+multiprocessing-logging>=0.3.4
+psutil>=5.9.0

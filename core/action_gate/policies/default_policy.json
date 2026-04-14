@@ -1,0 +1,178 @@
+{
+  "name": "Default Agent Policy",
+  "version": "1.0",
+  "last_updated": "2024-01-01T00:00:00Z",
+  "description": "Default policy for agents without specific role policies",
+  
+  "allowed_actions": [
+    "query",
+    "read",
+    "report"
+  ],
+  
+  "denied_actions": [
+    "payment",
+    "transfer",
+    "delete",
+    "execute",
+    "system_change",
+    "file_operation",
+    "campaign",
+    "analytics"
+  ],
+  
+  "default_actions": ["read", "query"],
+  
+  "scope_constraints": {
+    "resource_limits": {
+      "max_file_size": 1048576,
+      "max_memory_usage": 512,
+      "max_execution_time": 300
+    },
+    
+    "target_constraints": {
+      "allowed_targets": ["public_data", "user_data"],
+      "denied_targets": [
+        "system_files",
+        "admin_data",
+        "financial_data",
+        "sensitive_data"
+      ]
+    },
+    
+    "time_constraints": {
+      "allowed_hours": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+    },
+    
+    "location_constraints": {
+      "allowed_locations": ["*"]
+    }
+  },
+  
+  "action_constraints": {
+    "query": {
+      "result_limit": {
+        "type": "range",
+        "min": 1,
+        "max": 100
+      },
+      "timeout": {
+        "type": "range",
+        "min": 1,
+        "max": 60
+      }
+    },
+    
+    "read": {
+      "file_size": {
+        "type": "range",
+        "min": 0,
+        "max": 1048576
+      }
+    }
+  },
+  
+  "compliance_rules": [
+    {
+      "name": "basic_security_check",
+      "condition": "{{action.type}} in ['query', 'read']",
+      "action": "validate",
+      "description": "Basic security validation for all actions"
+    },
+    {
+      "name": "resource_monitoring",
+      "condition": "{{context.resource_usage}} > 80",
+      "action": "deny",
+      "description": "Deny actions if resource usage is high"
+    }
+  ],
+  
+  "audit_requirements": {
+    "audit_all_actions": true,
+    "audit_threshold": 100,
+    "retention_days": 365
+  },
+  
+  "rules": [
+    {
+      "name": "basic_action_allowed",
+      "action_types": ["query", "read", "report"],
+      "conditions": [
+        {
+          "type": "simple",
+          "field": "action.type",
+          "operator": "in",
+          "value": ["query", "read", "report"]
+        }
+      ]
+    },
+    
+    {
+      "name": "result_limit_check",
+      "action_types": ["query"],
+      "conditions": [
+        {
+          "type": "simple",
+          "field": "action.result_limit",
+          "operator": "less_than_or_equal",
+          "value": 100
+        }
+      ]
+    },
+    
+    {
+      "name": "file_size_check",
+      "action_types": ["read"],
+      "conditions": [
+        {
+          "type": "simple",
+          "field": "action.file_size",
+          "operator": "less_than_or_equal",
+          "value": 1048576
+        }
+      ]
+    },
+    
+    {
+      "name": "resource_safety_check",
+      "action_types": ["*"],
+      "conditions": [
+        {
+          "type": "resource",
+          "resource_type": "cpu_usage",
+          "operator": "less_than_or_equal",
+          "limit": 75
+        },
+        {
+          "type": "resource",
+          "resource_type": "memory_usage",
+          "operator": "less_than_or_equal",
+          "limit": 75
+        }
+      ]
+    },
+    
+    {
+      "name": "target_safety_check",
+      "action_types": ["*"],
+      "conditions": [
+        {
+          "type": "simple",
+          "field": "action.target",
+          "operator": "not_in",
+          "value": ["system_files", "admin_data", "financial_data", "sensitive_data"]
+        }
+      ]
+    }
+  ],
+  
+  "permissions": {
+    "read": true,
+    "write": false,
+    "create": false,
+    "update": false,
+    "delete": false,
+    "execute": false,
+    "system_access": false
+  }
+}

@@ -1,0 +1,175 @@
+# ChainGuardAI Master Configuration File
+
+# Global Settings
+global:
+  environment: development
+  log_level: INFO
+  debug: false
+  timezone: UTC
+
+# Identity Layer Configuration
+identity:
+  did_method: "did:web"
+  key_algorithm: "Ed25519"
+  key_curve: "Ed25519"
+  signature_algorithm: "EdDSA"
+  registry:
+    type: "file"
+    path: "./core/identity/registry/agent_registry.json"
+    encryption_enabled: true
+    backup_enabled: true
+    backup_interval: 3600  # seconds
+
+# Ingestion Layer Configuration
+ingestion:
+  sandbox_enabled: true
+  max_input_length: 10000
+  ipc_timeout: 30  # seconds
+  intent_schema_version: "1.0"
+  sanitization:
+    strip_html: true
+    strip_instructions: true
+    strip_hidden_content: true
+    allowed_tags: ["p", "br", "strong", "em"]
+
+# Detection Layer Configuration
+detection:
+  # Stage 1: Regex Detection
+  regex:
+    enabled: true
+    patterns_file: "./core/detection/stage1_regex/patterns.json"
+    case_sensitive: false
+    max_matches: 100
+  
+  # Stage 2: Embedding Detection
+  embedding:
+    enabled: true
+    model_name: "all-MiniLM-L6-v2"
+    cache_size: 1000
+    similarity_threshold: 0.7
+    batch_size: 32
+    device: "cpu"
+  
+  # Stage 3: Classifier Detection
+  classifier:
+    enabled: true
+    model_path: "./core/detection/stage3_classifier/classifier_model"
+    confidence_threshold: 0.8
+    training_data_path: "./core/detection/stage3_classifier/training_data"
+    retrain_interval: 86400  # seconds
+  
+  # Risk Aggregation
+  risk:
+    weights:
+      regex: 0.3
+      embedding: 0.4
+      classifier: 0.3
+    thresholds:
+      low: 0.3
+      medium: 0.6
+      high: 0.8
+
+# Action Gate Configuration
+action_gate:
+  dual_check_enabled: true
+  scope_check:
+    enabled: true
+    strict_mode: false
+    policy_path: "./core/action_gate/policies"
+  
+  safety_check:
+    enabled: true
+    parameter_validation: true
+    resource_limits:
+      max_file_size: 10485760  # 10MB
+      max_execution_time: 300  # seconds
+      max_memory_usage: 536870912  # 512MB
+  
+  escalation:
+    enabled: true
+    auto_approve_threshold: 0.95
+    human_review_threshold: 0.7
+    endpoint: "http://localhost:8081/escalation"
+    timeout: 60  # seconds
+
+# Audit Layer Configuration
+audit:
+  hash_chain:
+    algorithm: "SHA-256"
+    signing_enabled: true
+    private_key_path: "./keys/audit_private_key.pem"
+  
+  logging:
+    file_path: "./core/audit/logs/audit_chain.jsonl"
+    rotation_size: 104857600  # 100MB
+    backup_count: 10
+    compression: "gzip"
+  
+  verification:
+    auto_verify: true
+    verification_interval: 3600  # seconds
+    alert_on_tampering: true
+
+# API Configuration
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  reload: false
+  cors:
+    enabled: true
+    origins: ["http://localhost:3000", "http://localhost:8080"]
+    methods: ["GET", "POST", "PUT", "DELETE"]
+    headers: ["*"]
+  
+  auth:
+    jwt_secret: "your_api_secret_key_here"
+    jwt_algorithm: "HS256"
+    jwt_expiration: 86400  # seconds
+    rate_limit:
+      enabled: true
+      requests_per_minute: 60
+      burst_size: 10
+
+# Agent Configuration
+agents:
+  default_type: "default"
+  credentials_path: "./credentials"
+  capabilities:
+    - "read"
+    - "write"
+    - "execute"
+  
+  types:
+    finance_agent:
+      scope: ["payment", "reporting", "accounting"]
+      max_transaction_amount: 10000
+      requires_approval: true
+    
+    marketing_agent:
+      scope: ["campaign", "analytics", "content"]
+      max_campaign_budget: 5000
+      requires_approval: false
+    
+    default:
+      scope: ["read", "write"]
+      max_file_operations: 100
+      requires_approval: false
+
+# Development Configuration
+development:
+  mock_models: false
+  test_endpoints: false
+  skip_authentication: false
+  verbose_logging: false
+  profiling: false
+  
+# Monitoring Configuration
+monitoring:
+  metrics_enabled: true
+  health_check_interval: 60  # seconds
+  performance_tracking: true
+  alert_thresholds:
+    error_rate: 0.05
+    response_time: 1000  # milliseconds
+    memory_usage: 0.8

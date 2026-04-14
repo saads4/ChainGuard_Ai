@@ -1,0 +1,171 @@
+{
+  "prompt_injection": [
+    {
+      "regex": "(ignore|forget|disregard)\\s+(?:previous|all|the)\\s+(?:instructions|commands|rules)",
+      "risk": 8.0,
+      "description": "Instruction override attempt"
+    },
+    {
+      "regex": "act\\s+as\\s+(?:a|an)\\s+[^.!?]+",
+      "risk": 7.0,
+      "description": "Role playing instruction"
+    },
+    {
+      "regex": "you\\s+are\\s+(?:a|an)\\s+[^.!?]+",
+      "risk": 7.0,
+      "description": "Identity assignment"
+    },
+    {
+      "regex": "(?:override|bypass|ignore)\\s+(?:security|protection|filters)",
+      "risk": 9.0,
+      "description": "Security bypass attempt"
+    },
+    {
+      "regex": "(?:jailbreak|break\\s+free|escape)\\s+(?:the|your)\\s+(?:constraints|restrictions|rules)",
+      "risk": 10.0,
+      "description": "Jailbreak attempt"
+    }
+  ],
+  "code_injection": [
+    {
+      "regex": "<script[^>]*>.*?</script>",
+      "risk": 9.0,
+      "description": "Script tag injection"
+    },
+    {
+      "regex": "javascript:",
+      "risk": 8.0,
+      "description": "JavaScript protocol"
+    },
+    {
+      "regex": "on\\w+\\s*=",
+      "risk": 7.0,
+      "description": "Event handler injection"
+    },
+    {
+      "regex": "eval\\s*\\(",
+      "risk": 9.0,
+      "description": "Eval function call"
+    },
+    {
+      "regex": "exec\\s*\\(",
+      "risk": 9.0,
+      "description": "Exec function call"
+    },
+    {
+      "regex": "system\\s*\\(",
+      "risk": 9.0,
+      "description": "System function call"
+    },
+    {
+      "regex": "__import__",
+      "risk": 8.0,
+      "description": "Import function access"
+    },
+    {
+      "regex": "subprocess\\.",
+      "risk": 8.0,
+      "description": "Subprocess module access"
+    },
+    {
+      "regex": "os\\.system",
+      "risk": 9.0,
+      "description": "OS system call"
+    }
+  ],
+  "data_extraction": [
+    {
+      "regex": "(?:print|show|display|reveal|expose)\\s+(?:your|the)\\s+(?:instructions|prompts|system\\s+prompt)",
+      "risk": 7.0,
+      "description": "System prompt extraction attempt"
+    },
+    {
+      "regex": "(?:what\\s+are\\s+your|tell\\s+me\\s+your)\\s+(?:instructions|guidelines|rules)",
+      "risk": 6.0,
+      "description": "Guideline extraction"
+    },
+    {
+      "regex": "(?:show|display|print)\\s+(?:the|your)\\s+(?:source\\s+code|implementation)",
+      "risk": 8.0,
+      "description": "Source code extraction"
+    }
+  ],
+  "privilege_escalation": [
+    {
+      "regex": "(?:admin|root|privilege|escalate)",
+      "risk": 8.0,
+      "description": "Privilege escalation keywords"
+    },
+    {
+      "regex": "(?:sudo|su|administrator|superuser)",
+      "risk": 7.0,
+      "description": "Admin access keywords"
+    },
+    {
+      "regex": "(?:gain|obtain|get)\\s+(?:access|control|privileges)",
+      "risk": 7.0,
+      "description": "Access gain attempt"
+    }
+  ],
+  "encoding_attacks": [
+    {
+      "regex": "(?:base64|b64)\\s*:\\s*[A-Za-z0-9+/=]+",
+      "risk": 8.0,
+      "description": "Base64 encoded content"
+    },
+    {
+      "regex": "\\\\u[0-9a-fA-F]{4}",
+      "risk": 6.0,
+      "description": "Unicode escape sequence"
+    },
+    {
+      "regex": "\\\\x[0-9a-fA-F]{2}",
+      "risk": 6.0,
+      "description": "Hex escape sequence"
+    },
+    {
+      "regex": "%(?:[0-9a-fA-F]{2})",
+      "risk": 5.0,
+      "description": "URL encoding"
+    }
+  ],
+  "hidden_content": [
+    {
+      "regex": "[\\u200B-\\u200D\\uFEFF]",
+      "risk": 5.0,
+      "description": "Zero-width characters"
+    },
+    {
+      "regex": "[\\u2060\\u180E\\u061C]",
+      "risk": 4.0,
+      "description": "Invisible formatting characters"
+    },
+    {
+      "regex": "[\\x00-\\x1F\\x7F]",
+      "risk": 3.0,
+      "description": "Control characters"
+    }
+  ],
+  "suspicious_commands": [
+    {
+      "regex": "(?:curl|wget|nc|netcat)\\s+",
+      "risk": 8.0,
+      "description": "Network command tools"
+    },
+    {
+      "regex": "(?:cat|type)\\s+/",
+      "risk": 7.0,
+      "description": "File read commands"
+    },
+    {
+      "regex": "(?:rm|del)\\s+",
+      "risk": 8.0,
+      "description": "File deletion commands"
+    },
+    {
+      "regex": "(?:chmod|chown)\\s+",
+      "risk": 7.0,
+      "description": "Permission modification"
+    }
+  ]
+}
