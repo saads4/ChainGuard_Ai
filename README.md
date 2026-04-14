@@ -14,25 +14,77 @@ ChainGuardAI implements 5 distinct security layers:
 
 ## Quick Start
 
-### Installation
+### Prerequisites
+
+- **Python 3.10+** (check via `python --version`)
+- **Git** (to clone the repository)
+- **~2 GB free disk space** (for ML model cache + datasets)
+
+### Quick Start Checklist
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd AgentShield
+# 1. Clone the repository
+git clone https://github.com/saads4/ChainGuard_Ai.git
+cd ChainGuard_Ai
 
-# Install dependencies
+# 2. Create virtual environment
+python -m venv venv
+
+# 3. Activate virtual environment
+# Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+# Windows (Command Prompt):
+.\venv\Scripts\activate.bat
+# Linux/Mac:
+source venv/bin/activate
+
+# 4. Install dependencies
 pip install -r requirements.txt
 
-# Copy environment configuration
+# 5. Create environment file
 cp .env.example .env
+# Edit .env with your settings (optional for local dev)
 
-# Edit .env with your configuration
-nano .env
-
-# Bootstrap the system
+# 6. Bootstrap the system (generates keys, creates registry)
 python scripts/bootstrap.py
+
+# 7. Start the application server
+uvicorn api.app:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+### For Full ML Features (Optional)
+
+If you want to use the complete ML pipeline for injection detection:
+
+```bash
+# 1. Place datasets in the dataset/ folder:
+#    - dataset/stage2_benign/Stage_2.jsonl
+#    - dataset/stage3_training/MPDD.csv
+#    - dataset/attack_simulation/[3 CSV files]
+#    - dataset/action_log/action_dataset.csv
+
+# 2. Train ML models (downloads ~90MB of models)
+python ml/run_all.py
+
+# 3. Test the pipeline
+python pipeline_demo.py
+```
+
+### Verify Installation
+
+```bash
+# Run the test suite
+pytest tests/
+
+# Check API is working
+curl http://localhost:8000/docs
+```
+
+**Success Indicators:**
+- API server starts without errors
+- You can access http://localhost:8000/docs
+- Bootstrap creates `root_authority_keys.json` and `core/identity/registry/agent_registry.json`
+- Test suite passes (core functionality works even without ML datasets)
 
 ### Basic Usage
 
