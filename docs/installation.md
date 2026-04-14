@@ -18,6 +18,20 @@ This guide covers the installation and setup of ChainGuardAI, a comprehensive se
 - Git (for cloning the repository)
 - Virtual environment (recommended)
 
+### Core Dependencies
+
+The setup script automatically installs these key dependencies:
+- **cryptography>=41.0.0** - Cryptographic operations and identity management
+- **sentence-transformers>=2.2.0** - Embedding models for semantic analysis
+- **torch>=2.0.0** - ML framework for model inference
+- **scikit-learn>=1.4.0** - Classical ML for intent classification
+- **fastapi>=0.104.0** - API framework for REST endpoints
+- **uvicorn>=0.24.0** - ASGI server for API hosting
+- **pydantic>=2.0.0** - Data validation and settings management
+- **loguru>=0.7.0** - Structured logging across all modules
+
+See [requirements.txt](../requirements.txt) for complete dependency list.
+
 ## Quick Start
 
 ### 1. Clone the Repository
@@ -41,11 +55,13 @@ python scripts/setup.py
 ```
 
 The setup script will:
-- Validate your environment
-- Install dependencies
-- Create configuration files
-- Initialize directories
-- Generate cryptographic keys
+- **Environment Validation**: Check Python version and required commands
+- **Dependency Installation**: Install all required Python packages from requirements.txt
+- **Configuration Setup**: Create .env file from .env.example template
+- **Directory Initialization**: Create necessary directories (data/, keys/, logs/, etc.)
+- **Key Generation**: Generate cryptographic keys for identity management
+- **Database Setup**: Initialize agent registry and audit storage
+- **Installation Validation**: Verify all components are working correctly
 
 ### 4. Verify Installation
 
@@ -53,13 +69,23 @@ The setup script will:
 python scripts/dev.py test
 ```
 
+This runs comprehensive tests including:
+- Unit tests for all 5 security layers
+- Integration tests for end-to-end workflows
+- Attack simulation tests for security validation
+- Performance tests for system benchmarks
+
 ### 5. Start Development Server
 
 ```bash
 python scripts/dev.py server
 ```
 
-Visit http://localhost:8000/docs to see the API documentation.
+The development server starts on http://localhost:8000 with:
+- **Interactive API Documentation**: Visit http://localhost:8000/docs
+- **Health Check Endpoint**: Visit http://localhost:8000/health
+- **Real-time Logging**: Logs displayed in console
+- **Auto-reload**: Server restarts on code changes
 
 ## Manual Installation
 
@@ -110,10 +136,10 @@ mkdir -p logs
 ```python
 from core.identity.key_manager import KeyManager
 
-key_manager = KeyManager("data/keys")
-master_key = key_manager.generate_keypair()
-key_manager.store_keypair(master_key)
-print(f"Generated master key: {master_key['key_id']}")
+key_manager = KeyManager(keys_directory="./data/keys")
+private_key, public_key = key_manager.generate_keypair(agent_id="root")
+key_manager.save_keypair("root", private_key, public_key, encrypt=False)
+print(f"Generated root key pair")
 ```
 
 ### Step 5: Initialize Registry
@@ -121,8 +147,9 @@ print(f"Generated master key: {master_key['key_id']}")
 ```python
 from core.identity.registry.registry_manager import RegistryManager
 
-registry_manager = RegistryManager("data/registry/agent_registry.json")
+registry_manager = RegistryManager(registry_path="./data/registry/agent_registry.json")
 registry_manager.save_registry()
+print("Agent registry initialized")
 ```
 
 ## Docker Installation
@@ -154,6 +181,12 @@ Run with docker-compose:
 ```bash
 docker-compose up -d
 ```
+
+The Docker setup includes:
+- **ChainGuardAI API**: Main application service
+- **PostgreSQL Database**: Production database
+- **Redis**: Caching and session storage
+- **Nginx**: Reverse proxy and load balancer
 
 ## Production Deployment
 

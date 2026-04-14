@@ -148,6 +148,20 @@ See [Installation Guide](./installation.md) for detailed installation instructio
 - 10GB+ storage
 - Internet connection for model downloads
 
+### Dependencies
+
+The project uses the following key dependencies:
+- **cryptography>=41.0.0** - Cryptographic operations
+- **sentence-transformers>=2.2.0** - Embedding models
+- **torch>=2.0.0** - ML framework
+- **scikit-learn>=1.4.0** - Classical ML
+- **fastapi>=0.104.0** - API framework
+- **uvicorn>=0.24.0** - ASGI server
+- **pydantic>=2.0.0** - Data validation
+- **loguru>=0.7.0** - Structured logging
+
+See [requirements.txt](../requirements.txt) for complete list.
+
 ### Quick Install
 
 ```bash
@@ -311,18 +325,33 @@ Continuous security monitoring:
 
 ```
 chainguard_ai/
-|-- core/                 # Security framework
-|   |-- identity/         # Identity management
-|   |-- ingestion/        # Input processing
-|   |-- detection/        # Threat detection
-|   |-- action_gate/      # Action validation
+|-- core/                 # Security framework (5 layers)
+|   |-- identity/         # DID management, VCs, signatures
+|   |-- ingestion/        # Input processing and validation
+|   |-- detection/        # Multi-stage threat detection
+|   |-- action_gate/      # Action validation and policies
 |   `-- audit/           # Logging and monitoring
-|-- agents/               # Example agents
-|-- api/                  # REST API
-|-- tests/                # Test suite
-|-- scripts/              # Utility scripts
-|-- docs/                 # Documentation
-`-- config.yaml           # Main configuration
+|-- agents/               # Example agent implementations
+|   |-- finance_agent/    # Financial transaction agent
+|   |-- marketing_agent/  # Marketing campaign agent
+|   `-- base_agent.py     # Abstract base class
+|-- api/                  # REST API endpoints
+|-- tests/                # Comprehensive test suite
+|   |-- unit/             # Component unit tests
+|   |-- integration/      # End-to-end tests
+|   |-- attack_simulation/ # Security attack simulations
+|   `-- performance/      # Performance and load tests
+|-- scripts/              # Development and deployment scripts
+|   |-- setup.py          # Environment setup
+|   |-- dev.py            # Development commands
+|   |-- deploy.py         # Production deployment
+|   |-- bootstrap.py      # System initialization
+|   `-- generate_agent_keys.py # Key generation
+|-- ml/                   # ML models and training data
+|-- dataset/              # Training datasets
+|-- config.yaml           # Main configuration
+|-- requirements.txt       # Python dependencies
+`-- .env.example          # Environment variables template
 ```
 
 ### Adding New Agents
@@ -396,8 +425,26 @@ python scripts/dev.py server
 # Run tests
 python scripts/dev.py test
 
+# Run specific test types
+python scripts/dev.py test --type unit
+python scripts/dev.py test --type integration
+python scripts/dev.py test --type attack
+python scripts/dev.py test --type performance
+
 # Monitor logs
 python scripts/dev.py logs
+
+# Run security attack simulations
+python scripts/dev.py attack
+
+# Performance testing
+python scripts/dev.py perf --duration 60 --concurrency 10
+
+# Database operations
+python scripts/dev.py db
+
+# Generate agent keys
+python scripts/generate_agent_keys.py
 ```
 
 ### Production Deployment

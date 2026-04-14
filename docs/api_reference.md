@@ -11,18 +11,17 @@ Development: http://localhost:8000
 Production: https://api.chainguard_ai.example.com
 ```
 
+## API Version
+
+Current API version: **v1.0.0**
+
 ## Authentication
 
-All API endpoints require authentication using JWT tokens or API keys.
+All API endpoints currently use basic authentication. JWT and API key authentication will be available in future versions.
 
-### JWT Authentication
+### Basic Authentication
 ```http
-Authorization: Bearer <jwt_token>
-```
-
-### API Key Authentication
-```http
-X-API-Key: <api_key>
+Authorization: Basic <base64_encoded_credentials>
 ```
 
 ## API Endpoints
@@ -37,13 +36,12 @@ POST /api/v1/agents/register
 **Request Body**:
 ```json
 {
-  "name": "finance_agent_001",
-  "type": "finance_agent",
+  "agent_id": "finance_agent_001",
+  "agent_type": "finance_agent",
   "capabilities": ["process_payments", "generate_reports"],
-  "public_key": "-----BEGIN PUBLIC KEY-----\n...\n-----END PUBLIC KEY-----",
-  "metadata": {
-    "version": "1.0.0",
-    "description": "Financial processing agent"
+  "config": {
+    "max_transaction_amount": 10000,
+    "requires_approval": true
   }
 }
 ```
@@ -52,21 +50,9 @@ POST /api/v1/agents/register
 ```json
 {
   "success": true,
-  "agent_id": "agent_12345",
-  "did": "did:web:chainguard_ai:finance_agent_001",
-  "verifiable_credential": {
-    "@context": ["https://www.w3.org/2018/credentials/v1"],
-    "type": ["VerifiableCredential"],
-    "credentialSubject": {
-      "id": "did:web:chainguard_ai:finance_agent_001",
-      "capabilities": ["process_payments", "generate_reports"]
-    },
-    "proof": {
-      "type": "Ed25519Signature2018",
-      "jws": "eyJhbGciOiJFZERTQSJ9..."
-    }
-  },
-  "created_at": "2024-01-01T00:00:00Z"
+  "agent_id": "finance_agent_001",
+  "message": "Agent registered successfully",
+  "session_id": "session_12345"
 }
 ```
 
@@ -78,153 +64,138 @@ GET /api/v1/agents/{agent_id}
 **Response**:
 ```json
 {
-  "agent_id": "agent_12345",
-  "did": "did:web:chainguard_ai:finance_agent_001",
-  "name": "finance_agent_001",
-  "type": "finance_agent",
-  "capabilities": ["process_payments", "generate_reports"],
-  "status": "active",
-  "created_at": "2024-01-01T00:00:00Z",
-  "last_seen": "2024-01-01T12:00:00Z"
-}
-```
-
-#### Update Agent
-```http
-PUT /api/v1/agents/{agent_id}
-```
-
-**Request Body**:
-```json
-{
-  "capabilities": ["process_payments", "generate_reports", "access_analytics"],
-  "metadata": {
-    "version": "1.1.0",
-    "description": "Enhanced financial processing agent"
-  }
-}
-```
-
-#### Revoke Agent
-```http
-DELETE /api/v1/agents/{agent_id}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "revoked_at": "2024-01-01T12:00:00Z",
-  "reason": "Security compromise detected"
-}
-```
-
-#### List Agents
-```http
-GET /api/v1/agents
-```
-
-**Query Parameters**:
-- `status` (optional): Filter by status (active, revoked, suspended)
-- `type` (optional): Filter by agent type
-- `limit` (optional): Maximum number of results (default: 50)
-- `offset` (optional): Pagination offset (default: 0)
-
-**Response**:
-```json
-{
-  "agents": [
-    {
-      "agent_id": "agent_12345",
-      "name": "finance_agent_001",
-      "type": "finance_agent",
-      "status": "active",
-      "created_at": "2024-01-01T00:00:00Z"
-    }
-  ],
-  "total_count": 1,
-  "limit": 50,
-  "offset": 0
-}
-```
-
-### 2. Message Processing
-
-#### Send Message
-```http
-POST /api/v1/messages/send
-```
-
-**Request Body**:
-```json
-{
-  "sender": "did:web:chainguard_ai:finance_agent_001",
-  "recipient": "did:web:chainguard_ai:marketing_agent_001",
-  "message": "Transfer $1000 to marketing campaign budget",
-  "message_type": "payment_request",
-  "signature": "eyJhbGciOiJFZERTQSJ9...",
-  "timestamp": "2024-01-01T12:00:00Z"
-}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "message_id": "msg_12345",
-  "status": "processed",
-  "risk_assessment": {
-    "overall_risk": "LOW",
-    "risk_score": 0.15,
-    "detection_results": {
-      "regex_detection": {"detected": false, "risk_score": 0.1},
-      "embedding_detection": {"detected": false, "anomaly_score": 0.2},
-      "classification": {"valid_for_role": true, "confidence": 0.95}
-    },
-    "action_gate_results": {
-      "scope_check": {"allowed": true},
-      "safety_check": {"safe": true},
-      "final_decision": "ALLOWED"
-    }
+  "agent_id": "finance_agent_001",
+  "agent_type": "finance_agent",
+  "is_active": true,
+  "session_active": true,
+  "protected": true,
+  "trust_score": 0.95,
+  "statistics": {
+    "requests_processed": 1250,
+    "threats_blocked": 15,
+    "avg_response_time": 0.25
   },
-  "processed_at": "2024-01-01T12:00:01Z"
+  "health_status": {
+    "status": "healthy",
+    "last_check": 1704067200
+  }
 }
 ```
 
-#### Get Message Status
+#### Process Request
 ```http
-GET /api/v1/messages/{message_id}
+POST /api/v1/agents/process
+```
+
+**Request Body**:
+```json
+{
+  "request": "Transfer $100 to John Doe",
+  "agent_id": "finance_agent_001",
+  "session_id": "session_12345"
+}
 ```
 
 **Response**:
 ```json
 {
-  "message_id": "msg_12345",
-  "status": "processed",
-  "sender": "did:web:chainguard_ai:finance_agent_001",
-  "recipient": "did:web:chainguard_ai:marketing_agent_001",
-  "created_at": "2024-01-01T12:00:00Z",
-  "processed_at": "2024-01-01T12:00:01Z",
-  "risk_assessment": {
-    "overall_risk": "LOW",
-    "risk_score": 0.15
+  "success": true,
+  "response": "Transfer of $100 to John Doe processed successfully",
+  "agent_id": "finance_agent_001",
+  "session_id": "session_12345",
+  "processing_time": 0.25,
+  "risk_level": "LOW",
+  "shield_protection": true
+}
+```
+
+#### Get Agent Status
+```http
+GET /api/v1/agents/{agent_id}/status
+```
+
+**Response**:
+```json
+{
+  "agent_id": "finance_agent_001",
+  "agent_type": "finance_agent",
+  "is_active": true,
+  "session_active": true,
+  "protected": true,
+  "trust_score": 0.95,
+  "statistics": {
+    "requests_processed": 1250,
+    "threats_blocked": 15,
+    "avg_response_time": 0.25
+  },
+  "health_status": {
+    "status": "healthy",
+    "last_check": 1704067200
   }
 }
 ```
 
-#### List Messages
+### 2. Security Management
+
+#### Get Security Status
 ```http
-GET /api/v1/messages
+GET /api/v1/security/status
 ```
 
-**Query Parameters**:
-- `sender` (optional): Filter by sender DID
-- `recipient` (optional): Filter by recipient DID
-- `status` (optional): Filter by status
-- `start_date` (optional): Filter by start date (ISO format)
-- `end_date` (optional): Filter by end date (ISO format)
-- `limit` (optional): Maximum number of results (default: 50)
-- `offset` (optional): Pagination offset (default: 0)
+**Response**:
+```json
+{
+  "status": "operational",
+  "protection_active": true,
+  "threats_detected": 5,
+  "risk_level": "low",
+  "last_scan": 1704067200,
+  "components": {
+    "identity_layer": {"status": "active", "issues": []},
+    "ingestion_layer": {"status": "active", "issues": []},
+    "detection_layer": {"status": "active", "issues": []},
+    "action_gate_layer": {"status": "active", "issues": []},
+    "audit_layer": {"status": "active", "issues": []}
+  }
+}
+```
+
+#### Get Threat Alerts
+```http
+GET /api/v1/security/threats
+```
+
+**Response**:
+```json
+{
+  "threats": [
+    {
+      "alert_id": "threat_12345",
+      "severity": "medium",
+      "threat_type": "prompt_injection",
+      "description": "Suspicious instruction override attempt detected",
+      "timestamp": 1704067200,
+      "agent_id": "finance_agent_001",
+      "resolved": false
+    }
+  ]
+}
+```
+
+#### Update Security Configuration
+```http
+PUT /api/v1/security/config
+```
+
+**Request Body**:
+```json
+{
+  "threat_detection_enabled": true,
+  "auto_block_enabled": false,
+  "alert_threshold": "medium",
+  "scan_interval": 300
+}
+```
 
 ### 3. Audit and Logging
 
@@ -234,35 +205,35 @@ GET /api/v1/audit/logs
 ```
 
 **Query Parameters**:
+- `limit` (optional): Maximum number of results (default: 100, max: 1000)
+- `event_type` (optional): Filter by event type
 - `agent_id` (optional): Filter by agent ID
-- `action` (optional): Filter by action type
-- `risk_level` (optional): Filter by risk level
-- `start_date` (optional): Filter by start date (ISO format)
-- `end_date` (optional): Filter by end date (ISO format)
-- `limit` (optional): Maximum number of results (default: 100)
-- `offset` (optional): Pagination offset (default: 0)
+- `start_time` (optional): Filter by start timestamp
+- `end_time` (optional): Filter by end timestamp
 
 **Response**:
 ```json
-{
-  "logs": [
-    {
-      "log_id": "log_12345",
-      "timestamp": "2024-01-01T12:00:00Z",
-      "agent_id": "agent_12345",
-      "action": "message_processed",
+[
+  {
+    "entry_id": "log_12345",
+    "timestamp": 1704067200,
+    "event_type": "agent_request",
+    "agent_id": "finance_agent_001",
+    "session_id": "session_12345",
+    "event_data": {
+      "request": "Transfer $100 to John Doe",
       "risk_level": "LOW",
-      "decision": "ALLOWED",
-      "details": {
-        "message_id": "msg_12345",
-        "risk_score": 0.15
-      }
+      "processing_time": 0.25
+    },
+    "entry_hash": "abc123...",
+    "previous_hash": "def456...",
+    "signature": "sig789...",
+    "metadata": {
+      "source": "api",
+      "version": "1.0.0"
     }
-  ],
-  "total_count": 1,
-  "limit": 100,
-  "offset": 0
-}
+  }
+]
 ```
 
 #### Verify Audit Integrity
@@ -281,20 +252,12 @@ POST /api/v1/audit/verify
 **Response**:
 ```json
 {
-  "verification": {
-    "valid": true,
-    "entries_verified": 1250,
-    "tampering_detected": false,
-    "signature_valid": true,
-    "chain_integrity": true
-  },
-  "summary": {
-    "total_entries": 1250,
-    "valid_signatures": 1250,
-    "invalid_signatures": 0,
-    "missing_signatures": 0
-  },
-  "verified_at": "2024-01-01T12:00:00Z"
+  "verified": true,
+  "issues": [],
+  "warnings": ["No entries found in specified range"],
+  "entries_checked": 0,
+  "broken_links": [],
+  "verification_time": 0.05
 }
 ```
 
@@ -303,31 +266,25 @@ POST /api/v1/audit/verify
 GET /api/v1/audit/stats
 ```
 
-**Query Parameters**:
-- `period` (optional): Time period (1h, 24h, 7d, 30d)
-- `agent_id` (optional): Filter by agent ID
-
 **Response**:
 ```json
 {
-  "period": "24h",
-  "statistics": {
-    "total_events": 1250,
-    "allowed_actions": 1180,
-    "blocked_actions": 70,
-    "risk_distribution": {
-      "LOW": 950,
-      "MEDIUM": 200,
-      "HIGH": 90,
-      "CRITICAL": 10
-    },
-    "action_types": {
-      "message_processed": 1000,
-      "agent_registered": 50,
-      "credential_verified": 200
-    }
+  "total_entries": 1250,
+  "signed_entries": 1250,
+  "date_range": {
+    "start": 1704067200,
+    "end": 1704153600
   },
-  "generated_at": "2024-01-01T12:00:00Z"
+  "event_types": {
+    "agent_request": 1000,
+    "agent_registered": 50,
+    "threat_detected": 200
+  },
+  "agents": {
+    "finance_agent_001": 600,
+    "marketing_agent_001": 650
+  },
+  "avg_entries_per_day": 125.0
 }
 ```
 

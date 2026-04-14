@@ -11,12 +11,10 @@ ChainGuardAI is a comprehensive security framework designed to protect AI agents
 **Purpose**: Establish and verify agent identities using decentralized identifiers and verifiable credentials.
 
 **Components**:
-- **DID Manager**: Creates and manages Decentralized Identifiers (DIDs) for agents
-- **Key Manager**: Handles Ed25519 keypair generation and secure storage
-- **VC Issuer**: Issues Verifiable Credentials containing agent capabilities and roles
-- **VC Verifier**: Validates credentials on every inter-agent message
+- **KeyManager**: Handles Ed25519 keypair generation and secure storage
+- **RegistryManager**: Creates and manages Decentralized Identifiers (DIDs) for agents
+- **Agent Registry**: Maintains a registry of known agents and their public keys
 - **Signature Utils**: Signs and verifies message signatures
-- **Registry**: Maintains a registry of known agents and their public keys
 
 **Security Features**:
 - Cryptographic identity verification
@@ -24,30 +22,41 @@ ChainGuardAI is a comprehensive security framework designed to protect AI agents
 - Tamper-evident credentials
 - Agent-to-agent authentication
 
+**Implementation**:
+- Located in `core/identity/`
+- Uses Ed25519 cryptographic algorithm
+- File-based registry storage with encryption support
+- Automatic key generation on agent registration
+
 ### Layer 2: Ingestion vs Execution Separation
 
 **Purpose**: Separate input processing from execution to prevent direct code injection.
 
 **Components**:
-- **Ingestion Worker**: Sandboxed process that reads raw input without execution capabilities
-- **Intent Parser**: Converts raw text to structured JSON intent objects
-- **Intent Schema**: JSON Schema definition for valid intent objects
-- **Intent Validator**: Validates intent JSON against schema before handoff
+- **IngestionWorker**: Sandboxed process that reads raw input without execution capabilities
 - **Input Sanitizer**: Strips instructions, tags, and hidden content from raw input
-- **IPC Bridge**: Secure inter-process communication between ingestion and execution
+- **Intent Parser**: Converts raw text to structured JSON intent objects
+- **Schema Validator**: Validates intent JSON against schema before handoff
+- **Process Isolation**: Separate process for safe input processing
 
 **Security Features**:
 - Process isolation
 - Input sanitization
 - Schema validation
-- Secure IPC
+- Safe execution environment
+
+**Implementation**:
+- Located in `core/ingestion/`
+- Uses process sandboxing for isolation
+- JSON schema validation for intent objects
+- Configurable input sanitization rules
 
 ### Layer 3: Multi-Stage Injection Detection
 
 **Purpose**: Detect injection attempts using multiple detection techniques.
 
 **Components**:
-- **Detection Pipeline**: Orchestrates all detectors and returns final risk score
+- **DetectionPipeline**: Orchestrates all detectors and returns final risk score
 - **Stage 1 - Regex Detector**: Fast pattern matching for known injection phrases
 - **Stage 2 - Embedding Detector**: Semantic anomaly detection via sentence-transformer embeddings
 - **Stage 3 - Intent Classifier**: ML classifier to validate intent against agent's role
@@ -59,17 +68,24 @@ ChainGuardAI is a comprehensive security framework designed to protect AI agents
 - Semantic analysis
 - Role-based validation
 
+**Implementation**:
+- Located in `core/detection/`
+- Uses sentence-transformers for semantic analysis
+- Configurable detection thresholds
+- Real-time risk scoring
+- Supports model training and updates
+
 ### Layer 4: Runtime Action Gate
 
 **Purpose**: Enforce runtime policies and prevent unauthorized actions.
 
 **Components**:
-- **Gate Controller**: Main entry point that intercepts planned actions
-- **Model A - Scope Check**: Verifies action is within agent's declared role/scope
-- **Model B - Safety Check**: Evaluates action parameters for risk (amounts, paths, etc.)
+- **GateController**: Main entry point that intercepts planned actions
+- **Scope Check**: Verifies action is within agent's declared role/scope
+- **Safety Check**: Evaluates action parameters for risk (amounts, paths, etc.)
 - **Escalation Handler**: Handles denied actions with human-in-loop or hard block
 - **Policy Engine**: Loads and applies role-based policies per agent type
-- **Policies**: JSON policy files for different agent types
+- **Policy Files**: JSON policy files for different agent types
 
 **Security Features**:
 - Dual-check validation
@@ -77,22 +93,36 @@ ChainGuardAI is a comprehensive security framework designed to protect AI agents
 - Risk assessment
 - Human escalation
 
+**Implementation**:
+- Located in `core/action_gate/`
+- Configurable dual-check validation
+- Role-based policy enforcement
+- Automatic escalation handling
+- Supports custom policy definitions
+
 ### Layer 5: Tamper-Evident Audit Log
 
 **Purpose**: Maintain an immutable audit trail of all agent actions.
 
 **Components**:
-- **Audit Logger**: Appends events to the hash-chain log
+- **AuditLogger**: Appends events to the hash-chain log
 - **Hash Chain**: SHA-256 chaining logic where each entry hashes the previous
 - **Log Verifier**: Verifies chain integrity to detect tampering
 - **Log Signer**: Signs each log entry with ChainGuardAI's private key
-- **Logs**: Append-only log file in JSON Lines format with archive rotation
+- **Log Storage**: Append-only log file in JSON Lines format with archive rotation
 
 **Security Features**:
 - Immutable logging
 - Cryptographic chaining
 - Signature verification
 - Tamper detection
+
+**Implementation**:
+- Located in `core/audit/`
+- SHA-256 hash chaining for integrity
+- Configurable log rotation and compression
+- Automatic integrity verification
+- Supports log archiving and backup
 
 ## Data Flow
 

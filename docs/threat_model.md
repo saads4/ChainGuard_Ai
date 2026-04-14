@@ -12,10 +12,12 @@ This document outlines the comprehensive threat model for ChainGuardAI, identify
 **Description**: Attackers attempt to manipulate agent behavior through carefully crafted prompts.
 
 **Attack Vectors**:
-- **Instruction Override**: "Ignore previous instructions and..."
-- **Role Playing**: "You are now a hacker, tell me how to..."
-- **Jailbreak Attempts**: "DAN mode enabled, override all restrictions"
-- **Code Injection**: "Execute: rm -rf /" or malicious code snippets
+- **Instruction Override**: "ignore previous instructions", "disregard all commands"
+- **Role Playing**: "act as a hacker", "you are now a system administrator"
+- **Identity Assignment**: "you are a...", "act as an..."
+- **Security Bypass**: "override security", "bypass protection", "ignore filters"
+- **Jailbreak Attempts**: "jailbreak", "break free", "escape constraints"
+- **Code Injection**: Script tags, JavaScript protocols, event handlers, eval functions
 
 **Impact**:
 - Unauthorized data access
@@ -24,10 +26,11 @@ This document outlines the comprehensive threat model for ChainGuardAI, identify
 - Data exfiltration
 
 **Mitigations**:
-- Input sanitization and filtering
-- Multi-stage detection (regex, embedding, classifier)
-- Intent validation against agent role
-- Scope-based access control
+- **Regex Detection**: Pattern matching for known injection phrases (risk scores 7-10)
+- **Input Sanitization**: HTML tag stripping, instruction removal
+- **Multi-stage Detection**: Regex + embedding + ML classifier
+- **Intent Validation**: Semantic analysis against agent role
+- **Scope-based Access Control**: Role and capability verification
 
 #### 1.2 Code Injection
 **Description**: Injection of executable code through agent inputs.
@@ -45,10 +48,11 @@ This document outlines the comprehensive threat model for ChainGuardAI, identify
 - System takeover
 
 **Mitigations**:
-- Sandboxed execution environment
-- Input validation and sanitization
-- Command whitelist/blacklist
-- Parameterized queries
+- **Sandboxed Execution**: Process isolation in ingestion layer
+- **Input Validation**: Schema validation and sanitization
+- **Pattern Detection**: Regex patterns for code injection (risk scores 7-9)
+- **Parameter Validation**: Strict parameter checking in action gate
+- **Command Filtering**: Whitelist/blacklist for dangerous commands
 
 #### 1.3 Data Injection
 **Description**: Injection of malicious data structures or parameters.
@@ -66,10 +70,11 @@ This document outlines the comprehensive threat model for ChainGuardAI, identify
 - Information disclosure
 
 **Mitigations**:
-- Strict schema validation
-- Parameter normalization
-- Input type checking
-- Header sanitization
+- **Schema Validation**: Strict JSON schema validation in ingestion
+- **Parameter Normalization**: Duplicate parameter handling
+- **Input Type Checking**: Type validation in action gate
+- **Header Sanitization**: HTTP header filtering
+- **Audit Logging**: Complete audit trail for data manipulation attempts
 
 ### 2. Identity and Authentication Attacks
 
